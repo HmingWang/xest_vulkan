@@ -5,3 +5,5 @@ set(CMAKE_CXX_STANDARD 23)
 
 add_subdirectory(vulkan-tutorial)
 add_subdirectory(learning-vulkan)
+add_subdirectory(VulkanDemo)
+add_subdirectory(PixelGame)
