@@ -25,7 +25,7 @@ void DemoApplication::mainLoop() {
     while (!glfwWindowShouldClose(window)) {
         /* Render here */
         //glClear(GL_COLOR_BUFFER_BIT);
-        glfwf
+
         /* Swap front and back buffers */
         glfwSwapBuffers(window);
         glfwPollEvents();
