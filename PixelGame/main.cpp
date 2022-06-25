@@ -22,6 +22,8 @@ public:
 //            for (int y = 0; y < ScreenHeight(); y++)
 //                Draw(x, y, olc::Pixel(rand() % 255, rand() % 255, rand()% 255));
         DrawLine(olc::vi2d(0,100),olc::vi2d(100,100));
+        DrawString(olc::vi2d(0,0),"test case");
+
         return true;
     }
 

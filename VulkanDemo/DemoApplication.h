@@ -17,7 +17,14 @@ private:
     void mainLoop() override;
     void cleanup() override;
 
-    GLFWwindow* window;
+    GLFWwindow* window{};
+    HWND hWnd{};
+    HDC hDC{};
+    HDC hMem{};
+    void* pBuffer{};
+    HBITMAP hBmp{};
+
+    void render();
 };
 
 

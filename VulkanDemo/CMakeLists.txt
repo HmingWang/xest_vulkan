@@ -23,5 +23,5 @@ link_directories(/Users/whaim/VulkanSDK/1.3.216.0/macOS/lib)
 
 aux_source_directory(${CMAKE_CURRENT_SOURCE_DIR} SOURCE)
 
-add_executable(${PROJECT_NAME} ${SOURCE})
+add_executable(${PROJECT_NAME} main.cpp DemoApplication.cpp XestHeader.h)
 target_link_libraries(${PROJECT_NAME} glfw3 vulkan-1)
