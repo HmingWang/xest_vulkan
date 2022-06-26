@@ -58,16 +58,18 @@ void DemoApplication::mainLoop() {
 }
 
 void DemoApplication::cleanup() {
+#ifdef OS_WINDOWS
     DeleteObject(hBmp);
     DeleteDC(hMem);
     ReleaseDC(hWnd,hDC);
+#endif
     glfwDestroyWindow(window);
     glfwTerminate();
 }
 
 void DemoApplication::render() {
-    ((int*)pBuffer)[rand()%(800*600)]=0xF000;
-
-
-    BitBlt(hDC,0,0,800,600,hMem,0,0,SRCCOPY);
+//    ((int*)pBuffer)[rand()%(800*600)]=0xF000;
+//
+//
+//    BitBlt(hDC,0,0,800,600,hMem,0,0,SRCCOPY);
 }

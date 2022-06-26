@@ -4,6 +4,7 @@ if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
     message(STATUS "Configuring on/for Linux")
 
     find_package(Vulkan)
+    set(LIB_VULKAN vulkan X11)
 elseif(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
     message(STATUS "Configuring on/for macOS")
 
@@ -27,6 +28,7 @@ elseif(CMAKE_SYSTEM_NAME STREQUAL "Windows")
     # ¿âÄ¿Â¼
     link_directories(D:/vulkanSDK/1.3.216.0/Lib)
     link_directories("C:/Program Files (x86)/GLFW/lib")
+    set(LIB_VULKAN vulkan-1)
 
 elseif(CMAKE_SYSTEM_NAME STREQUAL "AIX")
     message(STATUS "Configuring on/for IBM AIX")
