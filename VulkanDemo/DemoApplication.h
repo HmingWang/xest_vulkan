@@ -11,6 +11,8 @@ class DemoApplication :implement IApplication{
 public:
     void run() override;
 
+    IApplication *getInstance() override;
+
 private:
     void initWindow() override;
     void initVulkan() override;

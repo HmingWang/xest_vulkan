@@ -5,6 +5,7 @@
 interface IApplication{
 public:
     virtual void run()=0;
+    virtual IApplication* getInstance()=0;
 private:
     virtual void initWindow()=0;
     virtual void initVulkan()=0;

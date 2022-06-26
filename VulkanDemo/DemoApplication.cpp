@@ -41,6 +41,10 @@ void DemoApplication::initWindow() {
 #endif
 }
 
+IApplication *DemoApplication::getInstance() {
+    return nullptr;
+}
+
 void DemoApplication::initVulkan() {
 
 }
