@@ -18,11 +18,16 @@ private:
     void cleanup() override;
 
     GLFWwindow* window{};
+
+#ifdef OS_WINDOWS
     HWND hWnd{};
     HDC hDC{};
     HDC hMem{};
     void* pBuffer{};
     HBITMAP hBmp{};
+#elifdef OS_LINUX
+    Window x11window{};
+#endif
 
     void render();
 };

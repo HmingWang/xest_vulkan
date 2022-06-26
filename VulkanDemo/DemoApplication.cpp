@@ -13,6 +13,7 @@ void DemoApplication::run() {
 void DemoApplication::initWindow() {
     glfwInit();
     window=glfwCreateWindow(800,600,"vulkan demo", nullptr, nullptr);
+#ifdef OS_WINDOWS
     hWnd=glfwGetWin32Window(window);
     hDC= GetDC(hWnd);
     hMem = CreateCompatibleDC(hDC);
@@ -35,6 +36,9 @@ void DemoApplication::initWindow() {
     SelectObject(hMem,hBmp);
     memset(pBuffer,0,800*600*4);
     //DeleteObject(hBmp);
+#elifdef OS_LINUX
+    x11window=glfwGetX11Window(window);
+#endif
 }
 
 void DemoApplication::initVulkan() {

@@ -16,12 +16,15 @@
 #include <set>
 #include <unordered_map>
 
+#include "predef.h"
+
+#define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
 
-#ifndef GLFW_EXPOSE_NATIVE_WIN32
-#define GLFW_EXPOSE_NATIVE_WIN32
-#define GLFW_EXPOSE_NATIVE_WGL
-#define GLFW_EXPOSE_NATIVE_WAYLAND
+#ifdef OS_WINDOWS
+    #define GLFW_EXPOSE_NATIVE_WIN32
+#elifdef OS_LINUX
+    #define GLFW_EXPOSE_NATIVE_X11
 #endif
 #include <GLFW/glfw3native.h>
 
