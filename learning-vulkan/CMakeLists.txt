@@ -10,7 +10,6 @@ set(Recipe_Name "learning-vulkan")
 # ON  - Use CMake to auto locate the Vulkan SDK.
 # OFF - Vulkan SDK path can be specified manually. This is helpful to test the build on various Vulkan version.
 option(AUTO_LOCATE_VULKAN "AUTO_LOCATE_VULKAN" ON)
-set(AUTO_LOCATE_VULKAN OFF)
 
 if(AUTO_LOCATE_VULKAN)
 	message(STATUS "Attempting auto locate Vulkan using CMake......")
