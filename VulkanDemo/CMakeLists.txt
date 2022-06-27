@@ -9,5 +9,5 @@ file(GLOB_RECURSE CPP_FILES ${CMAKE_CURRENT_SOURCE_DIR}/*.cpp)
 file(GLOB_RECURSE HPP_FILES ${CMAKE_CURRENT_SOURCE_DIR}/*.*)
 message(STATUS "the project source list: ${HPP_FILES}")
 
-add_executable(${PROJECT_NAME} ${HPP_FILES})
-target_link_libraries(${PROJECT_NAME} glfw3 ${LIB_VULKAN})
+add_executable(${PROJECT_NAME} ${HPP_FILES} CommFunc.cpp CommFunc.h)
+target_link_libraries(${PROJECT_NAME} ${LIB_VULKAN})

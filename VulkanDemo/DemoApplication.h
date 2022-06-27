@@ -7,6 +7,9 @@
 
 #include "XestHeader.h"
 
+
+
+
 class DemoApplication :implement IApplication{
 public:
     void run() override;
@@ -19,8 +22,16 @@ private:
     void mainLoop() override;
     void cleanup() override;
 
-    GLFWwindow* window{};
-
+private:
+    GLFWwindow* window;
+    VkInstance instance;
+    VkSurfaceKHR surface;
+    VkDebugUtilsMessengerEXT debugMessenger;
+    VkPhysicalDevice physicalDevice;
+    std::vector<VkPhysicalDevice> physicalDeviceList;
+    VkDevice device;
+    std::vector<VkQueueFamilyProperties> queueFamilies;
+    VkQueue queue;
 #ifdef OS_WINDOWS
     HWND hWnd{};
     HDC hDC{};

@@ -6,6 +6,7 @@
 
 void DemoApplication::run() {
     initWindow();
+    initVulkan();
     mainLoop();
     cleanup();
 }
@@ -47,6 +48,86 @@ IApplication *DemoApplication::getInstance() {
 
 void DemoApplication::initVulkan() {
 
+    //1. create instance
+    VkApplicationInfo appInfo{};
+    appInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
+    appInfo.pApplicationName = "Hello Triangle";
+    appInfo.applicationVersion = VK_MAKE_VERSION(1, 0, 0);
+    appInfo.pEngineName = "No Engine";
+    appInfo.engineVersion = VK_MAKE_VERSION(1, 0, 0);
+    appInfo.apiVersion = VK_API_VERSION_1_0;
+
+    //get extensions
+    uint32_t glfwExtensionCount = 0;
+    const char** glfwExtensions;
+    glfwExtensions = glfwGetRequiredInstanceExtensions(&glfwExtensionCount);
+    std::vector<const char*> extensions(glfwExtensions, glfwExtensions + glfwExtensionCount);
+    extensions.push_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
+
+    //setup debug messenger
+    VkDebugUtilsMessengerCreateInfoEXT debugCreateInfo;
+    debugCreateInfo.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT;
+    debugCreateInfo.messageSeverity = VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT;
+    debugCreateInfo.messageType = VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT;
+    debugCreateInfo.pfnUserCallback = debugCallback;
+
+    VkInstanceCreateInfo instanceCreateInfo{};
+    instanceCreateInfo.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
+    instanceCreateInfo.pApplicationInfo = &appInfo;
+    instanceCreateInfo.enabledExtensionCount=extensions.size();
+    instanceCreateInfo.ppEnabledExtensionNames=extensions.data();
+    instanceCreateInfo.enabledLayerCount = 0;
+    instanceCreateInfo.enabledLayerCount = validationLayers.size();
+    instanceCreateInfo.ppEnabledLayerNames = validationLayers.data();
+    instanceCreateInfo.pNext = &debugCreateInfo;
+    CHECK(vkCreateInstance(&instanceCreateInfo, nullptr, &instance));
+    //2 create debug messenger
+    auto pfnVkCreateDebugUtilsMessengerExt=(PFN_vkCreateDebugUtilsMessengerEXT) vkGetInstanceProcAddr(instance, "vkCreateDebugUtilsMessengerEXT");
+    CHECK(pfnVkCreateDebugUtilsMessengerExt(instance, &debugCreateInfo, nullptr, &debugMessenger));
+
+    //3. get physical device
+    uint32_t deviceCount = 0;
+    CHECK(vkEnumeratePhysicalDevices(instance, &deviceCount, nullptr));
+    physicalDeviceList.resize(deviceCount);
+    CHECK(vkEnumeratePhysicalDevices(instance, &deviceCount, physicalDeviceList.data()));
+    physicalDevice=physicalDeviceList.front();
+
+    //4. get queue families
+    uint32_t queueFamilyCount = 0;
+    vkGetPhysicalDeviceQueueFamilyProperties(physicalDevice, &queueFamilyCount, nullptr);
+    queueFamilies.resize(queueFamilyCount);
+    vkGetPhysicalDeviceQueueFamilyProperties(physicalDevice, &queueFamilyCount, queueFamilies.data());
+
+    //5. create logical device
+    std::vector<VkDeviceQueueCreateInfo> queueCreateInfos;
+    VkDeviceQueueCreateInfo queueCreateInfo{};
+    float queuePriority=1.0f;
+    queueCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
+    queueCreateInfo.queueFamilyIndex = 0;
+    queueCreateInfo.queueCount = 1;
+    queueCreateInfo.pQueuePriorities = &queuePriority;
+    queueCreateInfos.push_back(queueCreateInfo);
+
+    VkPhysicalDeviceFeatures deviceFeatures{};
+    deviceFeatures.samplerAnisotropy = VK_TRUE;
+
+    VkDeviceCreateInfo deviceCreateInfo{};
+    deviceCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
+    deviceCreateInfo.queueCreateInfoCount = queueCreateInfos.size();
+    deviceCreateInfo.pQueueCreateInfos = queueCreateInfos.data();
+    deviceCreateInfo.pEnabledFeatures = &deviceFeatures;
+    deviceCreateInfo.enabledExtensionCount = deviceExtensions.size();
+    deviceCreateInfo.ppEnabledExtensionNames = deviceExtensions.data();
+    deviceCreateInfo.enabledLayerCount = validationLayers.size();
+    deviceCreateInfo.ppEnabledLayerNames = validationLayers.data();
+
+    CHECK(vkCreateDevice(physicalDevice, &deviceCreateInfo, nullptr, &device));
+
+    //get queue
+    vkGetDeviceQueue(device, 0, 0, &queue);
+
+    CHECK(glfwCreateWindowSurface(instance,window, nullptr,&surface));
+
 }
 
 void DemoApplication::mainLoop() {
@@ -57,8 +138,6 @@ void DemoApplication::mainLoop() {
        // glfwSwapBuffers(window);
         glfwPollEvents();
     }
-
-
 }
 
 void DemoApplication::cleanup() {

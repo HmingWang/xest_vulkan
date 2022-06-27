@@ -8,24 +8,26 @@ if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
 elseif(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
     message(STATUS "Configuring on/for macOS")
 
-    # °üº¬Ä¿Â¼
+    # åŒ…å«ç›®å½•
     include_directories(/usr/local/Cellar/glfw/3.3.7/include)
     include_directories(/usr/local/Cellar/glm/0.9.9.8/include)
     include_directories(/Users/whaim/VulkanSDK/1.3.216.0/macOS/include)
 
-    # ¿âÄ¿Â¼
+    # åº“ç›®å½•
     link_directories(/usr/local/Cellar/glfw/3.3.7/lib)
     link_directories(/Users/whaim/VulkanSDK/1.3.216.0/macOS/lib)
+
+    set(LIB_VULKAN glfw vulkan)
 
 elseif(CMAKE_SYSTEM_NAME STREQUAL "Windows")
     message(STATUS "Configuring on/for Windows")
 
-    # °üº¬Ä¿Â¼
+    # åŒ…å«ç›®å½•
     include_directories(D:/VulkanSDK/1.3.216.0/Include)
     include_directories("C:/Program Files (x86)/GLFW/include")
     include_directories(D:/VulkanSDK/glm-0.9.9.8/glm)
     include_directories(D:/VulkanSDK/tinyobjloader-1.0.6)
-    # ¿âÄ¿Â¼
+    # åº“ç›®å½•
     link_directories(D:/vulkanSDK/1.3.216.0/Lib)
     link_directories("C:/Program Files (x86)/GLFW/lib")
     set(LIB_VULKAN vulkan-1)

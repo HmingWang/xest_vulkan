@@ -26,9 +26,21 @@
 #elifdef OS_LINUX
     #define GLFW_EXPOSE_NATIVE_X11
 #endif
-#include <GLFW/glfw3native.h>
+//#include <GLFW/glfw3native.h>
 
 #define interface class
 #define implement public
 
+#define CHECK(fn) \
+do{               \
+    std::cout<<"check func: "<<#fn<<std::endl;\
+    if(fn!=VK_SUCCESS){\
+        throw std::runtime_error(std::string("function error:")+__FILE__+":"+std::to_string(__LINE__)+":"+#fn);\
+    }\
+}\
+while(0)
+
+extern const std::vector<const char*> validationLayers;
+extern const std::vector<const char*> deviceExtensions;
 #include "IApplication.h"
+#include "CommFunc.h"
