@@ -20,14 +20,15 @@
 
 #define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
+#include<GLFW/glfw3native.h>
 
 #ifdef OS_WINDOWS
     #define GLFW_EXPOSE_NATIVE_WIN32
-#elifdef OS_LINUX
+#elif defined(OS_LINUX)
     #define GLFW_EXPOSE_NATIVE_X11
 #endif
 //#include <GLFW/glfw3native.h>
-
+#undef OS_WINDOWS
 #define interface class
 #define implement public
 

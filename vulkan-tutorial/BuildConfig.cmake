@@ -40,7 +40,7 @@ elseif(CMAKE_SYSTEM_NAME STREQUAL "Windows")
     # 库目录
     link_directories(/usr/local/Cellar/glfw/3.3.7/lib)
     link_directories(/Users/whaim/VulkanSDK/1.3.216.0/macOS/lib)
-
+    set(LIB_VULKAN glfw3 vulkan-1)
 elseif(CMAKE_SYSTEM_NAME STREQUAL "AIX")
     message(STATUS "Configuring on/for IBM AIX")
 else()
