@@ -84,11 +84,11 @@ void DemoApplication::initVulkan() {
     VkInstanceCreateInfo instanceCreateInfo{};
     instanceCreateInfo.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
     instanceCreateInfo.pApplicationInfo = &appInfo;
-    instanceCreateInfo.enabledExtensionCount = static_cast<uint32_t>(extensions.size());
+    instanceCreateInfo.enabledExtensionCount = extensions.size();
     instanceCreateInfo.ppEnabledExtensionNames = extensions.data();
-    instanceCreateInfo.enabledLayerCount = static_cast<uint32_t>(validationLayers.size());
+    instanceCreateInfo.enabledLayerCount = validationLayers.size();
     instanceCreateInfo.ppEnabledLayerNames = validationLayers.data();
-    instanceCreateInfo.pNext = (VkDebugUtilsMessengerCreateInfoEXT*) &debugCreateInfo;
+    instanceCreateInfo.pNext = &debugCreateInfo;
 
     CHECK(vkCreateInstance(&instanceCreateInfo, nullptr, &instance));
     //2 create debug messenger
