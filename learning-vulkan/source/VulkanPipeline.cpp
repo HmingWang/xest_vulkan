@@ -55,9 +55,12 @@ void VulkanPipeline::createPipelineCache()
 
 bool VulkanPipeline::createPipeline(VulkanDrawable* drawableObj, VkPipeline* pipeline, VulkanShader* shaderObj, VkBool32 includeDepth, VkBool32 includeVi)
 {
-	// Initialize the dynamic states, initially it�s empty
-    const int VK_DYNAMIC_STATE_RANGE_SIZE=3;//fix error
-	VkDynamicState dynamicStateEnables[VK_DYNAMIC_STATE_RANGE_SIZE];
+	// Initialize the dynamic states, initially it is empty
+	VkDynamicState dynamicStateEnables[]{
+            VK_DYNAMIC_STATE_VIEWPORT, 				//设置动态状态  视口矩阵
+            VK_DYNAMIC_STATE_SCISSOR, 				//裁剪矩阵
+            VK_DYNAMIC_STATE_LINE_WIDTH, 			//线段宽度
+    };
 	memset(dynamicStateEnables, 0, sizeof dynamicStateEnables);
 
 	// Specify the dynamic state information to pipeline through

@@ -1,7 +1,7 @@
 #
 # Chapter 11 - Textures in Vulkan - Optimal Layout.
 #
-# vulkan —ßœ∞µ⁄11’¬◊Ó÷’¥˙¬Î
+# vulkan Â≠¶‰π†Á¨¨11Á´†ÊúÄÁªà‰ª£Á†Å
 cmake_minimum_required(VERSION 3.22)
 
 set(Recipe_Name "learning-vulkan")
@@ -143,9 +143,13 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
 file(GLOB_RECURSE CPP_FILES ${CMAKE_CURRENT_SOURCE_DIR}/source/*.cpp)
 file(GLOB_RECURSE HPP_FILES ${CMAKE_CURRENT_SOURCE_DIR}/include/*.*)
 
+# msvc ÁºñËØë‰π±Á†Å
+add_compile_options("$<$<C_COMPILER_ID:MSVC>:/utf-8>")
+add_compile_options("$<$<CXX_COMPILER_ID:MSVC>:/utf-8>")
+
 # Build project, give it a name and includes list of file to be compiled
 add_executable(${Recipe_Name} ${CPP_FILES} ${HPP_FILES})
-
+set(CMAKE_CXX_FLAGS "/utf-8")
 # Link the debug and release libraries to the project
 target_link_libraries( ${Recipe_Name} ${VULKAN_LIB_LINK_LIST} )
 
