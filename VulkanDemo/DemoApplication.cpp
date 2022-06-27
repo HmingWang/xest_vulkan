@@ -65,21 +65,29 @@ void DemoApplication::initVulkan() {
     extensions.push_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
 
     //setup debug messenger
-    VkDebugUtilsMessengerCreateInfoEXT debugCreateInfo;
+    VkDebugUtilsMessengerCreateInfoEXT debugCreateInfo{};
     debugCreateInfo.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT;
     debugCreateInfo.messageSeverity = VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT;
     debugCreateInfo.messageType = VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT;
     debugCreateInfo.pfnUserCallback = debugCallback;
+    VkDebugUtilsMessengerCreateInfoEXT debugCreateInfo_inst{debugCreateInfo};
+
+    uint32_t layerCount=0;
+    vkEnumerateInstanceLayerProperties(&layerCount, nullptr);
+    std::vector<VkLayerProperties>  props(layerCount);
+    vkEnumerateInstanceLayerProperties( &layerCount,props.data());
+    for(const auto& e:props){
+        std::cout<<e.layerName<<std::endl;
+    }
 
     VkInstanceCreateInfo instanceCreateInfo{};
     instanceCreateInfo.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
     instanceCreateInfo.pApplicationInfo = &appInfo;
     instanceCreateInfo.enabledExtensionCount=extensions.size();
     instanceCreateInfo.ppEnabledExtensionNames=extensions.data();
-    instanceCreateInfo.enabledLayerCount = 0;
-    instanceCreateInfo.enabledLayerCount = validationLayers.size();
-    instanceCreateInfo.ppEnabledLayerNames = validationLayers.data();
-    instanceCreateInfo.pNext = &debugCreateInfo;
+    //instanceCreateInfo.enabledLayerCount = validationLayers.size();
+    //instanceCreateInfo.ppEnabledLayerNames = validationLayers.data();
+    //instanceCreateInfo.pNext = (VkDebugUtilsMessengerCreateInfoEXT*)&debugCreateInfo_inst;
     CHECK(vkCreateInstance(&instanceCreateInfo, nullptr, &instance));
     //2 create debug messenger
     auto pfnVkCreateDebugUtilsMessengerExt=(PFN_vkCreateDebugUtilsMessengerEXT) vkGetInstanceProcAddr(instance, "vkCreateDebugUtilsMessengerEXT");
