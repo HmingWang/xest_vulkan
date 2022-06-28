@@ -43,5 +43,7 @@ while(0)
 
 extern const std::vector<const char*> validationLayers;
 extern const std::vector<const char*> deviceExtensions;
+
+
 #include "IApplication.h"
 #include "CommFunc.h"

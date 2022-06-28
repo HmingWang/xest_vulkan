@@ -32,6 +32,11 @@ private:
     VkDevice device;
     std::vector<VkQueueFamilyProperties> queueFamilies;
     VkQueue queue;
+    VkSwapchainKHR swapChain;
+    std::vector<VkImage> swapChainImages;
+    std::vector<VkImageView> swapChainImageViews;
+    VkRenderPass renderPass;
+    VkDescriptorSetLayout descriptorSetLayout;
 #ifdef OS_WINDOWS
     HWND hWnd{};
     HDC hDC{};
@@ -43,6 +48,11 @@ private:
 #endif
 
     void render();
+
+    VkFormat
+    findSupportedFormat(const std::vector<VkFormat> &candidates, VkImageTiling tiling, VkFormatFeatureFlags features);
+
+    VkFormat findDepthFormat();
 };
 
 
