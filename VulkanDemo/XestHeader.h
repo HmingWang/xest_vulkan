@@ -15,6 +15,9 @@
 #include <optional>
 #include <set>
 #include <unordered_map>
+#include <glm/vec2.hpp>
+#include <glm/vec3.hpp>
+
 
 #include "predef.h"
 
@@ -43,6 +46,7 @@ while(0)
 
 extern const std::vector<const char*> validationLayers;
 extern const std::vector<const char*> deviceExtensions;
+
 
 
 #include "IApplication.h"

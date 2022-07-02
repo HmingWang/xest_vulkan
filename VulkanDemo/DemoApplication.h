@@ -7,8 +7,13 @@
 
 #include "XestHeader.h"
 
+struct Vertex {
+    glm::vec3 pos;
+    glm::vec3 color;
+    glm::vec2 texCoord;
+};
 
-
+const int MAX_FRAMES_IN_FLIGHT = 2;
 
 class DemoApplication :implement IApplication{
 public:
@@ -35,8 +40,28 @@ private:
     VkSwapchainKHR swapChain;
     std::vector<VkImage> swapChainImages;
     std::vector<VkImageView> swapChainImageViews;
+    std::vector<VkFramebuffer> swapChainFramebuffers;
+
+    VkImage colorImage;
+    VkDeviceMemory colorImageMemory;
+    VkImageView colorImageView;
+
+    VkImage depthImage;
+    VkDeviceMemory depthImageMemory;
+    VkImageView depthImageView;
+
     VkRenderPass renderPass;
     VkDescriptorSetLayout descriptorSetLayout;
+    VkPipelineLayout pipelineLayout;
+    VkPipeline graphicsPipeline;
+    VkCommandPool commandPool;
+    VkDescriptorPool descriptorPool;
+    std::vector<VkCommandBuffer> commandBuffers;
+    std::vector<VkSemaphore> imageAvailableSemaphores;
+    std::vector<VkSemaphore> renderFinishedSemaphores;
+    std::vector<VkFence> inFlightFences;
+    uint32_t currentFrame = 0;
+
 #ifdef OS_WINDOWS
     HWND hWnd{};
     HDC hDC{};
@@ -53,6 +78,10 @@ private:
     findSupportedFormat(const std::vector<VkFormat> &candidates, VkImageTiling tiling, VkFormatFeatureFlags features);
 
     VkFormat findDepthFormat();
+
+    VkShaderModule createShaderModule(const std::vector<char> &code);
+
+    void drawFrame();
 };
 
 

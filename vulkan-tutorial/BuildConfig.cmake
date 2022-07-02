@@ -23,7 +23,9 @@ elseif(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
 
 elseif(CMAKE_SYSTEM_NAME STREQUAL "Windows")
     message(STATUS "Configuring on/for Windows")
-
+    set(glfw3_DIR "D:\\Program Files (x86)\\GLFW\\lib\\cmake\\glfw3")
+    set(glm_DIR "D:\\VulkanSDK\\glm-0.9.9.8\\glm\\cmake\\glm")
+    set(tinyobjloader_DIR "D:\\VulkanSDK\\tinyobjloader-1.0.6")
     include_directories(D:/VulkanSDK/1.3.216.0/Include)
     include_directories("C:/Program Files (x86)/GLFW/include")
     include_directories(D:/VulkanSDK/glm-0.9.9.8/glm)
