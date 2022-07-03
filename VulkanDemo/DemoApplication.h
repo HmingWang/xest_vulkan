@@ -56,7 +56,7 @@ private:
     VkPipeline graphicsPipeline;
     VkCommandPool commandPool;
     VkDescriptorPool descriptorPool;
-    std::vector<VkCommandBuffer> commandBuffers;
+    std::vector<VkCommandBuffer> commandBuffers{};
     std::vector<VkSemaphore> imageAvailableSemaphores;
     std::vector<VkSemaphore> renderFinishedSemaphores;
     std::vector<VkFence> inFlightFences;

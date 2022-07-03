@@ -7,6 +7,7 @@ find_package (glfw3 REQUIRED)
 find_package (glm REQUIRED)
 find_package (Vulkan REQUIRED)
 #find_package (tinyobjloader REQUIRED)
+set(tinyobjloader_LIB )
 
 find_package (PkgConfig)
 #pkg_get_variable (STB_INCLUDEDIR stb includedir)
@@ -141,38 +142,38 @@ add_chapter (23_descriptor_sets
 
 add_chapter (24_texture_image
   SHADER 22_shader_ubo
-  TEXTURES ../images/texture.jpg
+  TEXTURES ./images/texture.jpg
   LIBS glm::glm)
 
 add_chapter (25_sampler
   SHADER 22_shader_ubo
-  TEXTURES ../images/texture.jpg
+  TEXTURES ./images/texture.jpg
   LIBS glm::glm)
 
 add_chapter (26_texture_mapping
   SHADER 26_shader_textures
-  TEXTURES ../images/texture.jpg
+  TEXTURES ./images/texture.jpg
   LIBS glm::glm)
 
 add_chapter (27_depth_buffering
   SHADER 27_shader_depth
-  TEXTURES ../images/texture.jpg
+  TEXTURES ./images/texture.jpg
   LIBS glm::glm)
 
 add_chapter (28_model_loading
   SHADER 27_shader_depth
-  MODELS ../resources/viking_room.obj
-  TEXTURES ../resources/viking_room.png
-  LIBS glm::glm tinyobjloader::tinyobjloader)
+  MODELS ./resources/viking_room.obj
+  TEXTURES ./resources/viking_room.png
+  LIBS glm::glm )
 
 add_chapter (29_mipmapping
   SHADER 27_shader_depth
-  MODELS ../resources/viking_room.obj
-  TEXTURES ../resources/viking_room.png
-  LIBS glm::glm tinyobjloader::tinyobjloader)
+  MODELS ./resources/viking_room.obj
+  TEXTURES ./resources/viking_room.png
+  LIBS glm::glm)
 
 add_chapter (30_multisampling
   SHADER 27_shader_depth
-  MODELS ../resources/viking_room.obj
-  TEXTURES ../resources/viking_room.png
-  LIBS glm::glm tinyobjloader::tinyobjloader)
+  MODELS ./resources/viking_room.obj
+  TEXTURES ./resources/viking_room.png
+  LIBS glm::glm)

@@ -1,1 +1,0 @@
-set(glfw3_DIR "C:/Program Files (x86)/GLFW")
