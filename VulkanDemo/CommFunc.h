@@ -14,5 +14,4 @@ VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(VkDebugUtilsMessageSeverityFlagBits
                                              void *pUserData);
 
 std::vector<char> readFile(const std::string& filename);
-VkShaderModule createShaderModule(const std::vector<char>& code);
 #endif //XEST_VULKAN_COMMFUNC_H

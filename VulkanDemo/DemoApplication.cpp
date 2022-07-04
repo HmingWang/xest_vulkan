@@ -15,8 +15,51 @@ void DemoApplication::initWindow() {
     glfwInit();
     glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
 
-    window=glfwCreateWindow(800,600,"vulkan demo", nullptr, nullptr);
+    window = glfwCreateWindow(800, 600, "vulkan demo", nullptr, nullptr);
+#ifdef OS_WINDOWS
+    hWnd=glfwGetWin32Window(window);
+    hDC= GetDC(hWnd);
+    hMem = CreateCompatibleDC(hDC);
+    //wl_surface* surface= glfwGetWaylandWindow(window);
 
+    BITMAPINFO bmpInfo;
+    bmpInfo.bmiHeader.biSize=sizeof(BITMAPINFOHEADER);
+    bmpInfo.bmiHeader.biWidth=800;
+    bmpInfo.bmiHeader.biHeight=600;
+    bmpInfo.bmiHeader.biPlanes=1;
+    bmpInfo.bmiHeader.biBitCount=32;
+    bmpInfo.bmiHeader.biCompression=BI_RGB;
+    bmpInfo.bmiHeader.biSizeImage=0;
+    bmpInfo.bmiHeader.biXPelsPerMeter=0;
+    bmpInfo.bmiHeader.biYPelsPerMeter=0;
+    bmpInfo.bmiHeader.biClrUsed=0;
+    bmpInfo.bmiHeader.biClrImportant=0;
+
+    hBmp= CreateDIBSection(hDC,&bmpInfo,DIB_RGB_COLORS,(void**)&pBuffer,0,0);
+    SelectObject(hMem,hBmp);
+    memset(pBuffer,0,800*600*4);
+    //DeleteObject(hBmp);
+#elifdef OS_LINUX
+    x11window=glfwGetX11Window(window);
+#endif
+}
+
+VkShaderModule DemoApplication::createShaderModule(const std::vector<char> &code) {
+    VkShaderModuleCreateInfo createInfo{};
+    createInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
+    createInfo.codeSize = code.size();
+    createInfo.pCode = reinterpret_cast<const uint32_t *>(code.data());
+
+    VkShaderModule shaderModule;
+    if (vkCreateShaderModule(device, &createInfo, nullptr, &shaderModule) != VK_SUCCESS) {
+        throw std::runtime_error("failed to create shader module!");
+    }
+
+    return shaderModule;
+}
+
+IApplication *DemoApplication::getInstance() {
+    return nullptr;
 }
 
 VkFormat DemoApplication::findDepthFormat() {
@@ -26,8 +69,10 @@ VkFormat DemoApplication::findDepthFormat() {
             VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT
     );
 }
-VkFormat DemoApplication::findSupportedFormat(const std::vector<VkFormat>& candidates, VkImageTiling tiling, VkFormatFeatureFlags features) {
-    for (VkFormat format : candidates) {
+
+VkFormat DemoApplication::findSupportedFormat(const std::vector<VkFormat> &candidates, VkImageTiling tiling,
+                                              VkFormatFeatureFlags features) {
+    for (VkFormat format: candidates) {
         VkFormatProperties props;
         vkGetPhysicalDeviceFormatProperties(physicalDevice, format, &props);
 
@@ -54,24 +99,28 @@ void DemoApplication::initVulkan() {
 
     //get extensions
     uint32_t glfwExtensionCount = 0;
-    const char** glfwExtensions;
+    const char **glfwExtensions;
     glfwExtensions = glfwGetRequiredInstanceExtensions(&glfwExtensionCount);
-    std::vector<const char*> extensions(glfwExtensions, glfwExtensions + glfwExtensionCount);
+    std::vector<const char *> extensions(glfwExtensions, glfwExtensions + glfwExtensionCount);
     extensions.push_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
 
     //setup debug messenger
     VkDebugUtilsMessengerCreateInfoEXT debugCreateInfo{};
     debugCreateInfo.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT;
-    debugCreateInfo.messageSeverity = VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT;
-    debugCreateInfo.messageType = VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT;
+    debugCreateInfo.messageSeverity =
+            VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT |
+            VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT;
+    debugCreateInfo.messageType =
+            VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT |
+            VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT;
     debugCreateInfo.pfnUserCallback = debugCallback;
 
-    uint32_t layerCount=0;
+    uint32_t layerCount = 0;
     vkEnumerateInstanceLayerProperties(&layerCount, nullptr);
-    std::vector<VkLayerProperties>  props(layerCount);
-    vkEnumerateInstanceLayerProperties( &layerCount,props.data());
-    for(const auto& e:props){
-        std::cout<<e.layerName<<std::endl;
+    std::vector<VkLayerProperties> props(layerCount);
+    vkEnumerateInstanceLayerProperties(&layerCount, props.data());
+    for (const auto &e: props) {
+        std::cout << e.layerName << std::endl;
     }
 
     VkInstanceCreateInfo instanceCreateInfo{};
@@ -86,18 +135,19 @@ void DemoApplication::initVulkan() {
     CHECK(vkCreateInstance(&instanceCreateInfo, nullptr, &instance));
 
     //2 setup debug messenger
-    auto pfnVkCreateDebugUtilsMessengerExt=(PFN_vkCreateDebugUtilsMessengerEXT) vkGetInstanceProcAddr(instance, "vkCreateDebugUtilsMessengerEXT");
+    auto pfnVkCreateDebugUtilsMessengerExt = (PFN_vkCreateDebugUtilsMessengerEXT) vkGetInstanceProcAddr(instance,
+                                                                                                        "vkCreateDebugUtilsMessengerEXT");
     CHECK(pfnVkCreateDebugUtilsMessengerExt(instance, &debugCreateInfo, nullptr, &debugMessenger));
 
     //3. create surface
-    CHECK(glfwCreateWindowSurface(instance,window, nullptr,&surface));
+    CHECK(glfwCreateWindowSurface(instance, window, nullptr, &surface));
 
     //4. pick up physical device
     uint32_t deviceCount = 0;
     CHECK(vkEnumeratePhysicalDevices(instance, &deviceCount, nullptr));
     physicalDeviceList.resize(deviceCount);
     CHECK(vkEnumeratePhysicalDevices(instance, &deviceCount, physicalDeviceList.data()));
-    physicalDevice=physicalDeviceList.front();
+    physicalDevice = physicalDeviceList.front();
 
     //5. create logical device
 
@@ -108,7 +158,7 @@ void DemoApplication::initVulkan() {
     vkGetPhysicalDeviceQueueFamilyProperties(physicalDevice, &queueFamilyCount, queueFamilies.data());
     std::vector<VkDeviceQueueCreateInfo> queueCreateInfos;
     VkDeviceQueueCreateInfo queueCreateInfo{};
-    float queuePriority=1.0f;
+    float queuePriority = 1.0f;
     queueCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
     queueCreateInfo.queueFamilyIndex = 0;
     queueCreateInfo.queueCount = 1;
@@ -118,13 +168,13 @@ void DemoApplication::initVulkan() {
     VkPhysicalDeviceFeatures deviceFeatures{};
     deviceFeatures.samplerAnisotropy = VK_TRUE;
 
-    uint32_t propsCount=0;
+    uint32_t propsCount = 0;
 //    vkEnumerateDeviceLayerProperties(physicalDevice,&propsCount, nullptr);
 //    VkLayerProperties layerProps;
 //    vkEnumerateDeviceLayerProperties(physicalDevice,&propsCount, &layerProps);
-    vkEnumerateDeviceExtensionProperties(physicalDevice,validationLayers[0],&propsCount, nullptr );
+    vkEnumerateDeviceExtensionProperties(physicalDevice, validationLayers[0], &propsCount, nullptr);
     std::vector<VkExtensionProperties> extProps(propsCount);
-    vkEnumerateDeviceExtensionProperties(physicalDevice,validationLayers[0],&propsCount, extProps.data() );
+    vkEnumerateDeviceExtensionProperties(physicalDevice, validationLayers[0], &propsCount, extProps.data());
 
 
     VkDeviceCreateInfo deviceCreateInfo{};
@@ -144,11 +194,11 @@ void DemoApplication::initVulkan() {
 
     //6. create swap chain
     VkSurfaceCapabilitiesKHR surfaceCapabilities;
-    CHECK(vkGetPhysicalDeviceSurfaceCapabilitiesKHR(physicalDevice,surface,&surfaceCapabilities));
+    CHECK(vkGetPhysicalDeviceSurfaceCapabilitiesKHR(physicalDevice, surface, &surfaceCapabilities));
     uint32_t formatCount;
-    CHECK(vkGetPhysicalDeviceSurfaceFormatsKHR(physicalDevice,surface,&formatCount, nullptr));
+    CHECK(vkGetPhysicalDeviceSurfaceFormatsKHR(physicalDevice, surface, &formatCount, nullptr));
     std::vector<VkSurfaceFormatKHR> surfaceFormats(formatCount);
-    CHECK(vkGetPhysicalDeviceSurfaceFormatsKHR(physicalDevice,surface,&formatCount, surfaceFormats.data()));
+    CHECK(vkGetPhysicalDeviceSurfaceFormatsKHR(physicalDevice, surface, &formatCount, surfaceFormats.data()));
     uint32_t presentModeCount;
     vkGetPhysicalDeviceSurfacePresentModesKHR(physicalDevice, surface, &presentModeCount, nullptr);
     std::vector<VkPresentModeKHR> presentModes(presentModeCount);
@@ -157,10 +207,10 @@ void DemoApplication::initVulkan() {
     VkSurfaceFormatKHR surfaceFormat = surfaceFormats.front();
     VkPresentModeKHR presentMode = presentModes.front();
     VkExtent2D extent = surfaceCapabilities.currentExtent;
-    uint32_t imageCount=surfaceCapabilities.minImageCount;
+    uint32_t imageCount = surfaceCapabilities.minImageCount;
 
-    VkBool32 isSuppored=VK_FALSE;
-    vkGetPhysicalDeviceSurfaceSupportKHR(physicalDevice,0,surface,&isSuppored);
+    VkBool32 isSuppored = VK_FALSE;
+    vkGetPhysicalDeviceSurfaceSupportKHR(physicalDevice, 0, surface, &isSuppored);
 
     VkSwapchainCreateInfoKHR swapchainCreateInfo{};
     swapchainCreateInfo.sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
@@ -181,7 +231,7 @@ void DemoApplication::initVulkan() {
     CHECK(vkGetSwapchainImagesKHR(device, swapChain, &imageCount, swapChainImages.data()));
 
     //7. create image view
-    for (const auto& image:swapChainImages) {
+    for (const auto &image: swapChainImages) {
         VkImageViewCreateInfo viewCreateInfo{};
         viewCreateInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
         viewCreateInfo.image = image;
@@ -246,17 +296,19 @@ void DemoApplication::initVulkan() {
     subpass.colorAttachmentCount = 1;
     subpass.pColorAttachments = &colorAttachmentRef;
     subpass.pDepthStencilAttachment = &depthAttachmentRef;
-    subpass.pResolveAttachments = &colorAttachmentResolveRef;
+    //subpass.pResolveAttachments = &colorAttachmentResolveRef;
 
     VkSubpassDependency dependency{};
     dependency.srcSubpass = VK_SUBPASS_EXTERNAL;
     dependency.dstSubpass = 0;
-    dependency.srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT | VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
+    dependency.srcStageMask =
+            VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT | VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
     dependency.srcAccessMask = 0;
-    dependency.dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT | VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
+    dependency.dstStageMask =
+            VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT | VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
     dependency.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT | VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
 
-    std::array<VkAttachmentDescription, 3> attachments = {colorAttachment, depthAttachment, colorAttachmentResolve };
+    std::array<VkAttachmentDescription, 3> attachments = {colorAttachment, depthAttachment, colorAttachmentResolve};
     VkRenderPassCreateInfo renderPassInfo{};
     renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
     renderPassInfo.attachmentCount = static_cast<uint32_t>(attachments.size());
@@ -295,8 +347,8 @@ void DemoApplication::initVulkan() {
     //10. create pipeline
 
     //create shader stage
-    const std::string VERT_SHADER="../../shaders/vert.spv";
-    const std::string FRAG_SHADER="../../shaders/frag.spv";
+    const std::string VERT_SHADER = "../../shaders/vert.spv";
+    const std::string FRAG_SHADER = "../../shaders/frag.spv";
     auto vertShaderCode = readFile(VERT_SHADER);
     auto fragShaderCode = readFile(FRAG_SHADER);
 
@@ -356,14 +408,14 @@ void DemoApplication::initVulkan() {
     VkViewport viewport{};
     viewport.x = 0.0f;
     viewport.y = 0.0f;
-    viewport.width = (float) swapChainExtent.width;
-    viewport.height = (float) swapChainExtent.height;
+    viewport.width = (float) extent.width;
+    viewport.height = (float) extent.height;
     viewport.minDepth = 0.0f;
     viewport.maxDepth = 1.0f;
 
     VkRect2D scissor{};
     scissor.offset = {0, 0};
-    scissor.extent = swapChainExtent;
+    scissor.extent = extent;
 
     VkPipelineViewportStateCreateInfo viewportState{};
     viewportState.sType = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO;
@@ -385,7 +437,7 @@ void DemoApplication::initVulkan() {
     VkPipelineMultisampleStateCreateInfo multisampling{};
     multisampling.sType = VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO;
     multisampling.sampleShadingEnable = VK_FALSE;
-    multisampling.rasterizationSamples = msaaSamples;
+    multisampling.rasterizationSamples = VK_SAMPLE_COUNT_1_BIT;
 
     VkPipelineDepthStencilStateCreateInfo depthStencil{};
     depthStencil.sType = VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO;
@@ -396,7 +448,8 @@ void DemoApplication::initVulkan() {
     depthStencil.stencilTestEnable = VK_FALSE;
 
     VkPipelineColorBlendAttachmentState colorBlendAttachment{};
-    colorBlendAttachment.colorWriteMask = VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT;
+    colorBlendAttachment.colorWriteMask =
+            VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT;
     colorBlendAttachment.blendEnable = VK_FALSE;
 
     VkPipelineColorBlendStateCreateInfo colorBlending{};
@@ -415,9 +468,7 @@ void DemoApplication::initVulkan() {
     pipelineLayoutInfo.setLayoutCount = 1;
     pipelineLayoutInfo.pSetLayouts = &descriptorSetLayout;
 
-    if (vkCreatePipelineLayout(device, &pipelineLayoutInfo, nullptr, &pipelineLayout) != VK_SUCCESS) {
-        throw std::runtime_error("failed to create pipeline layout!");
-    }
+    CHECK (vkCreatePipelineLayout(device, &pipelineLayoutInfo, nullptr, &pipelineLayout));
 
     VkGraphicsPipelineCreateInfo pipelineInfo{};
     pipelineInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
@@ -435,22 +486,116 @@ void DemoApplication::initVulkan() {
     pipelineInfo.subpass = 0;
     pipelineInfo.basePipelineHandle = VK_NULL_HANDLE;
 
-    if (vkCreateGraphicsPipelines(device, VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &graphicsPipeline) != VK_SUCCESS) {
-        throw std::runtime_error("failed to create graphics pipeline!");
-    }
-
+    CHECK (vkCreateGraphicsPipelines(device, VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &graphicsPipeline));
     vkDestroyShaderModule(device, fragShaderModule, nullptr);
     vkDestroyShaderModule(device, vertShaderModule, nullptr);
+
+    //11. create command pool
+    VkCommandPoolCreateInfo commandPoolCreateInfo{};
+    commandPoolCreateInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
+    commandPoolCreateInfo.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
+    commandPoolCreateInfo.queueFamilyIndex = 0;
+
+    CHECK (vkCreateCommandPool(device, &commandPoolCreateInfo, nullptr, &commandPool));
+
+    //12. create color resource
+    //13. create depth resource
+
+    //14. create frame buffer
+//    swapChainFramebuffers.resize(swapChainImageViews.size());
+//
+//    for (size_t i = 0; i < swapChainImageViews.size(); i++) {
+//        std::array<VkImageView, 3> attchs = {
+//                colorImageView,
+//                depthImageView,
+//                swapChainImageViews[i]
+//        };
+//
+//        VkFramebufferCreateInfo framebufferInfo{};
+//        framebufferInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
+//        framebufferInfo.renderPass = renderPass;
+//        framebufferInfo.attachmentCount = static_cast<uint32_t>(attchs.size());
+//        framebufferInfo.pAttachments = attchs.data();
+//        framebufferInfo.width = extent.width;
+//        framebufferInfo.height = extent.height;
+//        framebufferInfo.layers = 1;
+//
+//        CHECK (vkCreateFramebuffer(device, &framebufferInfo, nullptr, &swapChainFramebuffers[i]) );
+//    }
+
+    //15. create descriptor pool
+    std::array<VkDescriptorPoolSize, 2> poolSizes{};
+    poolSizes[0].type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+    poolSizes[0].descriptorCount = static_cast<uint32_t>(MAX_FRAMES_IN_FLIGHT);
+    poolSizes[1].type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+    poolSizes[1].descriptorCount = static_cast<uint32_t>(MAX_FRAMES_IN_FLIGHT);
+
+    VkDescriptorPoolCreateInfo descriptorPoolCreateInfo{};
+    descriptorPoolCreateInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
+    descriptorPoolCreateInfo.poolSizeCount = static_cast<uint32_t>(poolSizes.size());
+    descriptorPoolCreateInfo.pPoolSizes = poolSizes.data();
+    descriptorPoolCreateInfo.maxSets = static_cast<uint32_t>(MAX_FRAMES_IN_FLIGHT);
+
+    //CHECK (vkCreateDescriptorPool(device, &descriptorPoolCreateInfo, nullptr, &descriptorPool));
+
+    //16. create command buffer
+    commandBuffers = {};
+    commandBuffers.resize(MAX_FRAMES_IN_FLIGHT);
+    VkCommandBufferAllocateInfo allocInfo{};
+    allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
+    allocInfo.commandPool = commandPool;
+    allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
+    allocInfo.commandBufferCount = (uint32_t) commandBuffers.size();
+    CHECK (vkAllocateCommandBuffers(device, &allocInfo, commandBuffers.data()));
+
+    //17. create sync objects
+    imageAvailableSemaphores.resize(MAX_FRAMES_IN_FLIGHT);
+    renderFinishedSemaphores.resize(MAX_FRAMES_IN_FLIGHT);
+    inFlightFences.resize(MAX_FRAMES_IN_FLIGHT);
+
+    VkSemaphoreCreateInfo semaphoreInfo{};
+    semaphoreInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
+
+    VkFenceCreateInfo fenceInfo{};
+    fenceInfo.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
+    fenceInfo.flags = VK_FENCE_CREATE_SIGNALED_BIT;
+
+    for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
+        CHECK(vkCreateSemaphore(device, &semaphoreInfo, nullptr, &imageAvailableSemaphores[i]));
+        CHECK(vkCreateSemaphore(device, &semaphoreInfo, nullptr, &renderFinishedSemaphores[i]));
+        CHECK(vkCreateFence(device, &fenceInfo, nullptr, &inFlightFences[i]));
+    }
+}
+
+
+void DemoApplication::drawFrame() {
+    vkAcquireNextImageKHR(device, swapChain, UINT64_MAX, imageAvailableSemaphores[currentFrame], nullptr,
+                          &currentFrame);
+
+    VkPresentInfoKHR presentInfo{};
+    presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
+
+    //presentInfo.waitSemaphoreCount = 1;
+    //presentInfo.pWaitSemaphores = signalSemaphores;
+
+    VkSwapchainKHR swapChains[] = {swapChain};
+    presentInfo.swapchainCount = 1;
+    presentInfo.pSwapchains = swapChains;
+    presentInfo.pImageIndices = &currentFrame;
+
+    CHECK(vkQueuePresentKHR(queue, &presentInfo));
+
+    //currentFrame = (currentFrame + 1) % MAX_FRAMES_IN_FLIGHT;
 }
 
 void DemoApplication::mainLoop() {
     while (!glfwWindowShouldClose(window)) {
         /* Render here */
-        render();
-        /* Swap front and back buffers */
-       // glfwSwapBuffers(window);
+        drawFrame();        /* Swap front and back buffers */
+        // glfwSwapBuffers(window);
         glfwPollEvents();
     }
+    vkDeviceWaitIdle(device);
 }
 
 void DemoApplication::cleanup() {
@@ -469,4 +614,3 @@ void DemoApplication::render() {
 //
 //    BitBlt(hDC,0,0,800,600,hMem,0,0,SRCCOPY);
 }
-
