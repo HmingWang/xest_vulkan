@@ -16,37 +16,9 @@ void DemoApplication::initWindow() {
     glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
 
     window=glfwCreateWindow(800,600,"vulkan demo", nullptr, nullptr);
-#ifdef OS_WINDOWS
-    hWnd=glfwGetWin32Window(window);
-    hDC= GetDC(hWnd);
-    hMem = CreateCompatibleDC(hDC);
-    //wl_surface* surface= glfwGetWaylandWindow(window);
 
-    BITMAPINFO bmpInfo;
-    bmpInfo.bmiHeader.biSize=sizeof(BITMAPINFOHEADER);
-    bmpInfo.bmiHeader.biWidth=800;
-    bmpInfo.bmiHeader.biHeight=600;
-    bmpInfo.bmiHeader.biPlanes=1;
-    bmpInfo.bmiHeader.biBitCount=32;
-    bmpInfo.bmiHeader.biCompression=BI_RGB;
-    bmpInfo.bmiHeader.biSizeImage=0;
-    bmpInfo.bmiHeader.biXPelsPerMeter=0;
-    bmpInfo.bmiHeader.biYPelsPerMeter=0;
-    bmpInfo.bmiHeader.biClrUsed=0;
-    bmpInfo.bmiHeader.biClrImportant=0;
-
-    hBmp= CreateDIBSection(hDC,&bmpInfo,DIB_RGB_COLORS,(void**)&pBuffer,0,0);
-    SelectObject(hMem,hBmp);
-    memset(pBuffer,0,800*600*4);
-    //DeleteObject(hBmp);
-#elifdef OS_LINUX
-    x11window=glfwGetX11Window(window);
-#endif
 }
 
-IApplication *DemoApplication::getInstance() {
-    return nullptr;
-}
 VkFormat DemoApplication::findDepthFormat() {
     return findSupportedFormat(
             {VK_FORMAT_D32_SFLOAT, VK_FORMAT_D32_SFLOAT_S8_UINT, VK_FORMAT_D24_UNORM_S8_UINT},
@@ -497,3 +469,4 @@ void DemoApplication::render() {
 //
 //    BitBlt(hDC,0,0,800,600,hMem,0,0,SRCCOPY);
 }
+

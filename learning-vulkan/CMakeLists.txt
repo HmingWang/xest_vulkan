@@ -10,7 +10,7 @@ set(Recipe_Name "learning-vulkan")
 # ON  - Use CMake to auto locate the Vulkan SDK.
 # OFF - Vulkan SDK path can be specified manually. This is helpful to test the build on various Vulkan version.
 option(AUTO_LOCATE_VULKAN "AUTO_LOCATE_VULKAN" ON)
-
+set(AUTO_LOCATE_VULKAN OFF)
 if(AUTO_LOCATE_VULKAN)
 	message(STATUS "Attempting auto locate Vulkan using CMake......")
 	# Find Vulkan Path using CMake's Vulkan Module
@@ -39,7 +39,8 @@ if(AUTO_LOCATE_VULKAN)
 	endif()
 else()
 	message(STATUS "Attempting to locate Vulkan SDK using manual path......")
-	set(VULKAN_SDK "D:/VulkanSDK")
+#	set(VULKAN_SDK "D:/VulkanSDK")
+	set(VULKAN_SDK "/Users/whaim/VulkanSDK")
 	set(VULKAN_VERSION "1.3.216.0")
 	set(VULKAN_PATH "${VULKAN_SDK}/${VULKAN_VERSION}")
 	message(STATUS "Using manual specified path: ${VULKAN_PATH}")
@@ -143,13 +144,9 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
 file(GLOB_RECURSE CPP_FILES ${CMAKE_CURRENT_SOURCE_DIR}/source/*.cpp)
 file(GLOB_RECURSE HPP_FILES ${CMAKE_CURRENT_SOURCE_DIR}/include/*.*)
 
-# msvc 编译乱码
-add_compile_options("$<$<C_COMPILER_ID:MSVC>:/utf-8>")
-add_compile_options("$<$<CXX_COMPILER_ID:MSVC>:/utf-8>")
-
 # Build project, give it a name and includes list of file to be compiled
 add_executable(${Recipe_Name} ${CPP_FILES} ${HPP_FILES})
-set(CMAKE_CXX_FLAGS "/utf-8")
+
 # Link the debug and release libraries to the project
 target_link_libraries( ${Recipe_Name} ${VULKAN_LIB_LINK_LIST} )
 

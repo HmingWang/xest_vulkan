@@ -43,7 +43,7 @@
 #include <sstream>
 #include <vector>
 #include <iomanip>
-#include <assert.h>
+#include <cassert>
 
 // Header files for Singleton
 #include <memory>

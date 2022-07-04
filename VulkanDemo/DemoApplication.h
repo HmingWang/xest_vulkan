@@ -14,8 +14,6 @@ class DemoApplication :implement IApplication{
 public:
     void run() override;
 
-    IApplication *getInstance() override;
-
 private:
     void initWindow() override;
     void initVulkan() override;
@@ -23,6 +21,7 @@ private:
     void cleanup() override;
 
 private:
+
     GLFWwindow* window;
     VkInstance instance;
     VkSurfaceKHR surface;
@@ -30,6 +29,9 @@ private:
     VkPhysicalDevice physicalDevice;
     std::vector<VkPhysicalDevice> physicalDeviceList;
     VkDevice device;
+
+
+private:
     std::vector<VkQueueFamilyProperties> queueFamilies;
     VkQueue queue;
     VkSwapchainKHR swapChain;
@@ -37,15 +39,7 @@ private:
     std::vector<VkImageView> swapChainImageViews;
     VkRenderPass renderPass;
     VkDescriptorSetLayout descriptorSetLayout;
-#ifdef OS_WINDOWS
-    HWND hWnd{};
-    HDC hDC{};
-    HDC hMem{};
-    void* pBuffer{};
-    HBITMAP hBmp{};
-#elifdef OS_LINUX
-    Window x11window{};
-#endif
+
 
     void render();
 

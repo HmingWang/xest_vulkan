@@ -27,7 +27,7 @@ std::vector<char> readFile(const std::string& filename) {
     file.close();
 
     return buffer;
-}
+}ß
 
 VkShaderModule createShaderModule(const std::vector<char>& code) {
     VkShaderModuleCreateInfo createInfo{};
